@@ -4,6 +4,7 @@ const thead = document.getElementById('tableHeaderRow');
 const toolNames = document.getElementById('toolNames');
 const inputArgsText = document.getElementById('inputArgsText');
 const executeBtn = document.getElementById('executeBtn');
+const toolResults = document.getElementById('toolResults');
 
 // Inject content script first.
 (async () => {
@@ -73,7 +74,8 @@ executeBtn.onclick = async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const name = toolNames.selectedOptions[0].value;
   const inputArgs = inputArgsText.value;
-  chrome.tabs.sendMessage(tab.id, { action: 'EXECUTE_TOOL', name, inputArgs });
+  const result = await chrome.tabs.sendMessage(tab.id, { action: 'EXECUTE_TOOL', name, inputArgs });
+  toolResults.textContent = `${result}\n`;
 };
 
 tbody.ondblclick = () => {

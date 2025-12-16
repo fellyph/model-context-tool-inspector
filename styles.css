@@ -148,7 +148,12 @@ button:disabled {
   border: 1px solid #e5e7eb;
 }
 
-pre {
+#toolResults {
+  white-space: break-spaces;
+  word-break: break-all;
+}
+
+tbody pre {
   white-space: normal;
 }
 tbody.prettify pre {

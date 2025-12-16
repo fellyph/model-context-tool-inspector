@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener(async ({ action, name, inputArgs }) => {
+chrome.runtime.onMessage.addListener(async ({ action, name, inputArgs }, _, reply) => {
   try {
     if (!navigator.modelContextTesting) {
       throw new Error('Error: You must run Chrome with the "Experimental Web Platform features" flag enabled.');
@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener(async ({ action, name, inputArgs }) => {
       navigator.modelContextTesting.registerToolsChangedCallback(listTools);
     }
     if (action == 'EXECUTE_TOOL') {
-      await navigator.modelContextTesting.executeTool(name, inputArgs);
+      reply(await navigator.modelContextTesting.executeTool(name, inputArgs));
     }
   } catch ({ message }) {
     chrome.runtime.sendMessage({ message });
