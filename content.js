@@ -10,6 +10,7 @@ chrome.runtime.onMessage.addListener(({ action, name, inputArgs }, _, reply) => 
       navigator.modelContextTesting.registerToolsChangedCallback(listTools);
     }
     if (action == 'EXECUTE_TOOL') {
+      console.debug(`[WebMCP] Execute tool "${name}" with`, inputArgs);
       const promise = navigator.modelContextTesting.executeTool(name, inputArgs);
       promise.then(reply).catch(({ message }) => reply(JSON.stringify(message)));
       return true;
@@ -21,5 +22,6 @@ chrome.runtime.onMessage.addListener(({ action, name, inputArgs }, _, reply) => 
 
 function listTools() {
   const tools = navigator.modelContextTesting.listTools();
+  console.debug(`[WebMCP] Got ${tools.length} tools`, tools);
   chrome.runtime.sendMessage({ tools, url: location.href });
 }
