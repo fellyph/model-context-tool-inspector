@@ -1,5 +1,4 @@
 import { GoogleGenAI } from './node_modules/@google/genai/dist/web/index.mjs';
-import env from './.env.json' with { type: 'json' };
 
 const statusDiv = document.getElementById('status');
 const tbody = document.getElementById('tableBody');
@@ -113,9 +112,16 @@ script_tools {
 
 let genAI, chat;
 
-function initGenAI() {
-  localStorage.apiKey ??= env.apiKey;
-  localStorage.model ??= env.model || 'gemini-2.5-flash';
+const envModulePromise = import('./.env.json', { with: { type: 'json' } });
+
+async function initGenAI() {
+  let env;
+  try {
+    // Try load .env.json if present.
+    env = (await envModulePromise).default;
+  } catch {}
+  if (env?.apiKey) localStorage.apiKey ??= env.apiKey;
+  localStorage.model ??= env?.model || 'gemini-2.5-flash';
   genAI = localStorage.apiKey ? new GoogleGenAI({ apiKey: localStorage.apiKey }) : undefined;
   promptBtn.disabled = !localStorage.apiKey;
   resetBtn.disabled = !localStorage.apiKey;
