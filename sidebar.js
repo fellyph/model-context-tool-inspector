@@ -10,6 +10,7 @@ const executeBtn = document.getElementById('executeBtn');
 const toolResults = document.getElementById('toolResults');
 const userPromptText = document.getElementById('userPromptText');
 const promptBtn = document.getElementById('promptBtn');
+const traceBtn = document.getElementById('traceBtn');
 const resetBtn = document.getElementById('resetBtn');
 const apiKeyBtn = document.getElementById('apiKeyBtn');
 const promptResults = document.getElementById('promptResults');
@@ -153,15 +154,18 @@ userPromptText.onkeydown = (event) => {
 };
 
 promptBtn.onclick = async () => {
+  promptBtn.disabled = true;
   try {
-    promptBtn.disabled = true;
     await promptAI();
   } catch (error) {
+    trace.push({ error });
     logPrompt(`⚠️ Error: "${error}"`);
   } finally {
     promptBtn.disabled = false;
   }
 };
+
+let trace = [];
 
 async function promptAI() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -171,14 +175,14 @@ async function promptAI() {
   const message = userPromptText.value;
   userPromptText.value = '';
   promptResults.textContent += `User prompt: "${message}"\n`;
-  let currentResult = await chat.sendMessage({
-    message,
-    config: getConfig(),
-  });
+  const sendMessageParams = { message, config: getConfig() };
+  trace.push({ userPrompt: sendMessageParams });
+  let currentResult = await chat.sendMessage(sendMessageParams);
   let finalResponseGiven = false;
 
   while (!finalResponseGiven) {
     const response = currentResult;
+    trace.push({ response });
     const functionCalls = response.functionCalls || [];
 
     if (functionCalls.length === 0) {
@@ -212,16 +216,16 @@ async function promptAI() {
       // FIXME: New WebMCP tools may not be discovered if there's a navigation.
       // An articial timeout could be introduced for mitigation but it's not robust.
 
-      currentResult = await chat.sendMessage({
-        message: toolResponses,
-        config: getConfig(),
-      });
+      const sendMessageParams = { message: toolResponses, config: getConfig() };
+      trace.push({ userPrompt: sendMessageParams });
+      currentResult = await chat.sendMessage(sendMessageParams);
     }
   }
 }
 
 resetBtn.onclick = () => {
   chat = undefined;
+  trace = [];
   userPromptText.value = '';
   promptResults.textContent = '';
 };
@@ -231,6 +235,11 @@ apiKeyBtn.onclick = () => {
   if (apiKey == null) return;
   localStorage.apiKey = apiKey;
   initGenAI();
+};
+
+traceBtn.onclick = async () => {
+  const text = JSON.stringify(trace, '', ' ');
+  await navigator.clipboard.writeText(text);
 };
 
 executeBtn.onclick = async () => {

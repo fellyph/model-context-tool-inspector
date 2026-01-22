@@ -169,16 +169,14 @@ button:disabled {
   outline-offset: -1px !important;
 }
 
-#resetBtn,
-#apiKeyBtn {
+.secondary {
   color: #2563eb;
-  background-color: unset;
+  background-color: unset !important;
   outline: 1px solid #2563eb;
   outline-offset: -1px;
 }
 
-#resetBtn:hover,
-#apiKeyBtn:hover {
+.secondary:hover {
   color: #1d4ed8;
   outline-color: #1d4ed8;
 }
