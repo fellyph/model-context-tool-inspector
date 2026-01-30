@@ -279,6 +279,7 @@ traceBtn.onclick = async () => {
 };
 
 executeBtn.onclick = async () => {
+  toolResults.textContent = '';
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const name = toolNames.selectedOptions[0].value;
   const inputArgs = inputArgsText.value;
@@ -346,6 +347,14 @@ function generateTemplateFromSchema(schema) {
     return null;
   }
 
+  if (schema.hasOwnProperty('const')) {
+    return schema.const;
+  }
+
+  if (Array.isArray(schema.oneOf) && schema.oneOf.length > 0) {
+    return generateTemplateFromSchema(schema.oneOf[0]);
+  }
+
   if (schema.hasOwnProperty('default')) {
     return schema.default;
   }
@@ -357,7 +366,6 @@ function generateTemplateFromSchema(schema) {
   switch (schema.type) {
     case 'object':
       const obj = {};
-      // Traverse 'properties' if they exist
       if (schema.properties) {
         Object.keys(schema.properties).forEach((key) => {
           obj[key] = generateTemplateFromSchema(schema.properties[key]);
@@ -366,8 +374,6 @@ function generateTemplateFromSchema(schema) {
       return obj;
 
     case 'array':
-      // For arrays, we generate a single item based on the 'items' schema
-      // to show what the array structure looks like.
       if (schema.items) {
         return [generateTemplateFromSchema(schema.items)];
       }
@@ -375,7 +381,7 @@ function generateTemplateFromSchema(schema) {
 
     case 'string':
       if (schema.enum && schema.enum.length > 0) {
-        return schema.enum[0]; // Return first enum option
+        return schema.enum[0];
       }
       if (schema.format === 'date-time' || schema.format === 'date') {
         return new Date().toISOString();
@@ -397,7 +403,6 @@ function generateTemplateFromSchema(schema) {
       return null;
 
     default:
-      // Fallback for "any" types or undefined types
       return {};
   }
 }
