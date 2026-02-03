@@ -156,7 +156,8 @@ async function initGenAI() {
 initGenAI();
 
 async function suggestUserPrompt() {
-  if (currentTools.length == 0 || !genAI || userPromptText.value !== lastSuggestedUserPrompt) return;
+  if (currentTools.length == 0 || !genAI || userPromptText.value !== lastSuggestedUserPrompt)
+    return;
   const userPromptId = ++userPromptPendingId;
   const response = await genAI.models.generateContent({
     model: localStorage.model,
@@ -175,7 +176,8 @@ async function suggestUserPrompt() {
       JSON.stringify(currentTools),
     ],
   });
-  if (userPromptId !== userPromptPendingId || userPromptText.value !== lastSuggestedUserPrompt) return;
+  if (userPromptId !== userPromptPendingId || userPromptText.value !== lastSuggestedUserPrompt)
+    return;
   lastSuggestedUserPrompt = response.text;
   userPromptText.value = '';
   for (const chunk of response.text) {
@@ -392,8 +394,11 @@ function generateTemplateFromSchema(schema) {
       if (schema.format === 'date-time') {
         return new Date().toISOString();
       }
-      if (schema.format === 'time') {
-        return new Date().toISOString().substring(11,16);
+      if (
+        schema.format === 'time' ||
+        schema.format === '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\\.[0-9]{1,3})?)?$'
+      ) {
+        return new Date().toISOString().substring(11, 16);
       }
       if (schema.format === 'tel') {
         return '123-456-7890';
