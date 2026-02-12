@@ -391,8 +391,14 @@ function generateTemplateFromSchema(schema) {
       if (schema.format === 'date') {
         return new Date().toISOString().substring(0, 10);
       }
-      if (schema.format === 'date-time') {
-        return new Date().toISOString();
+      if (schema.format === '^[0-9]{4}-(0[1-9]|1[0-2])-[0-9]{2}T([01][0-9]|2[0-3]):[0-5][0-9]$') {
+        return new Date().toISOString().substring(0, 16);
+      }
+      if (schema.format === '^[0-9]{4}-(0[1-9]|1[0-2])$') {
+        return new Date().toISOString().substring(0, 7);
+      }
+      if (schema.format === '^[0-9]{4}-W(0[1-9]|[1-4][0-9]|5[0-3])$') {
+        return `${new Date().toISOString().substring(0, 4)}-W01`;
       }
       if (schema.format === '^([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\\.[0-9]{1,3})?)?$') {
         return new Date().toISOString().substring(11, 23);
