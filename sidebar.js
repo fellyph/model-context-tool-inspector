@@ -45,9 +45,9 @@ chrome.runtime.onMessage.addListener(async ({ message, tools, url }, sender) => 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (sender.tab && sender.tab.id !== tab.id) return;
 
-  tbody.innerHTML = '';
-  thead.innerHTML = '';
-  toolNames.innerHTML = '';
+  tbody.replaceChildren();
+  thead.replaceChildren();
+  toolNames.replaceChildren();
 
   statusDiv.textContent = message;
   statusDiv.hidden = !message;
@@ -58,7 +58,12 @@ chrome.runtime.onMessage.addListener(async ({ message, tools, url }, sender) => 
 
   if (!tools || tools.length === 0) {
     const row = document.createElement('tr');
-    row.innerHTML = `<td colspan="100%"><i>No tools registered yet in ${url || tab.url}</i></td>`;
+    const td = document.createElement('td');
+    td.colSpan = 100;
+    const i = document.createElement('i');
+    i.textContent = `No tools registered yet in ${url || tab.url}`;
+    td.appendChild(i);
+    row.appendChild(td);
     tbody.appendChild(row);
     inputArgsText.value = '';
     inputArgsText.disabled = true;
@@ -85,7 +90,9 @@ chrome.runtime.onMessage.addListener(async ({ message, tools, url }, sender) => 
     keys.forEach((key) => {
       const td = document.createElement('td');
       try {
-        td.innerHTML = `<pre>${JSON.stringify(JSON.parse(item[key]), '', '  ')}</pre>`;
+        const pre = document.createElement('pre');
+        pre.textContent = JSON.stringify(JSON.parse(item[key]), '', '  ');
+        td.appendChild(pre);
       } catch (error) {
         td.textContent = item[key];
       }
